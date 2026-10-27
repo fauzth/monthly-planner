@@ -1,6 +1,7 @@
 import { useFinance } from "../../hooks/useFinance";
 import { formatCurrency } from "../../utils/formatCurrency";
 import { formatDate } from "../../utils/formatDate";
+import { Link } from "react-router-dom";
 
 export default function TransactionItem({ tx }) {
   const { pockets, deleteTransaction } = useFinance();
@@ -42,9 +43,14 @@ export default function TransactionItem({ tx }) {
       </div>
       <div className="ml-3 shrink-0 text-right">
         <p className={`font-semibold ${amountClass}`}>{amountText}</p>
-        <button onClick={handleDelete} className="mt-1 text-xs text-gray-400">
-          Hapus
-        </button>
+        <div className="mt-1 flex justify-end gap-3 text-xs">
+          <Link to={`/edit/${tx.id}`} className="text-emerald-600">
+            Edit
+          </Link>
+          <button onClick={handleDelete} className="text-gray-400">
+            Hapus
+          </button>
+        </div>
       </div>
     </div>
   );

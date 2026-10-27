@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FinanceContext } from "./FinanceContext";
 import { getPocketStats } from "../utils/calculateBalance";
 import { todayStr } from "../utils/formatDate";
@@ -51,27 +51,68 @@ export function FinanceProvider({ children }) {
     }
   }, [data]);
 
-  const addPocket = (pocket) =>
-    setData((d) => ({
-      ...d,
-      pockets: [...d.pockets, { id: newId(), ...pocket }],
-    }));
+  const addPocket = useCallback(
+    (pocket) =>
+      setData((d) => ({
+        ...d,
+        pockets: [...d.pockets, { id: newId(), ...pocket }],
+      })),
+    [],
+  );
 
-  const addTransaction = (tx) =>
-    setData((d) => ({
-      ...d,
-      transactions: [{ id: newId(), ...tx }, ...d.transactions],
-    }));
+  const updatePocket = useCallback(
+    (id, changes) =>
+      setData((d) => ({
+        ...d,
+        pockets: d.pockets.map((p) => (p.id === id ? { ...p, ...changes } : p)),
+      })),
+    [],
+  );
 
-  const deleteTransaction = (id) =>
-    setData((d) => ({
-      ...d,
-      transactions: d.transactions.filter((t) => t.id !== id),
-    }));
+  const archivePocket = useCallback(
+    (id) => updatePocket(id, { archived: true }),
+    [updatePocket],
+  );
+
+  const restorePocket = useCallback(
+    (id) => updatePocket(id, { archived: false }),
+    [updatePocket],
+  );
+
+  const addTransaction = useCallback(
+    (tx) =>
+      setData((d) => ({
+        ...d,
+        transactions: [{ id: newId(), ...tx }, ...d.transactions],
+      })),
+    [],
+  );
+
+  const updateTransaction = useCallback(
+    (id, tx) =>
+      setData((d) => ({
+        ...d,
+        transactions: d.transactions.map((t) =>
+          t.id === id ? { id, ...tx } : t,
+        ),
+      })),
+    [],
+  );
+
+  const deleteTransaction = useCallback(
+    (id) =>
+      setData((d) => ({
+        ...d,
+        transactions: d.transactions.filter((t) => t.id !== id),
+      })),
+    [],
+  );
 
   const value = useMemo(() => {
     const { pockets, transactions } = data;
     const pocketStats = getPocketStats(pockets, transactions);
+    const activePocketStats = pocketStats.filter((p) => !p.archived);
+    const archivedPocketStats = pocketStats.filter((p) => p.archived);
 
     const sum = (type) =>
       transactions
@@ -80,21 +121,40 @@ export function FinanceProvider({ children }) {
 
     const totalIncome = sum("income");
     const totalExpense = sum("expense");
-    const totalAllocated = pockets.reduce((s, p) => s + p.allocated, 0);
+
+    // dana yang "terkunci": budget pocket aktif + pengeluaran pocket arsip
+    const committed =
+      activePocketStats.reduce((s, p) => s + p.allocated, 0) +
+      archivedPocketStats.reduce((s, p) => s + p.spent, 0);
 
     return {
       pockets,
       transactions,
       pocketStats,
+      activePocketStats,
+      archivedPocketStats,
       totalIncome,
       totalExpense,
       balance: totalIncome - totalExpense,
-      unallocated: totalIncome - totalAllocated,
+      unallocated: totalIncome - committed,
       addPocket,
+      updatePocket,
+      archivePocket,
+      restorePocket,
       addTransaction,
+      updateTransaction,
       deleteTransaction,
     };
-  }, [data]);
+  }, [
+    data,
+    addPocket,
+    updatePocket,
+    archivePocket,
+    restorePocket,
+    addTransaction,
+    updateTransaction,
+    deleteTransaction,
+  ]);
 
   return (
     <FinanceContext.Provider value={value}>{children}</FinanceContext.Provider>

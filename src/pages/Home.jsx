@@ -3,8 +3,13 @@ import { useFinance } from "../hooks/useFinance";
 import { formatCurrency } from "../utils/formatCurrency";
 
 export default function Home() {
-  const { pocketStats, totalIncome, totalExpense, balance, unallocated } =
-    useFinance();
+  const {
+    activePocketStats: pocketStats,
+    totalIncome,
+    totalExpense,
+    balance,
+    unallocated,
+  } = useFinance();
 
   return (
     <div className="space-y-4 p-4">

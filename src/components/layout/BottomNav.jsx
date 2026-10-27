@@ -5,6 +5,7 @@ const items = [
   { to: "/pockets", label: "Pocket" },
   { to: "/add", label: "Tambah" },
   { to: "/history", label: "History" },
+  { to: "/summary", label: "Ringkasan" },
 ];
 
 export default function BottomNav() {

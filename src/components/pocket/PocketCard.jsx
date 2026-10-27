@@ -1,11 +1,14 @@
 import { formatCurrency } from "../../utils/formatCurrency";
 import PocketProgress from "./PocketProgress";
 
-export default function PocketCard({ pocket }) {
+export default function PocketCard({ pocket, onClick }) {
   const remaining = pocket.allocated - pocket.spent;
 
   return (
-    <div className="rounded-2xl bg-white p-4 shadow-sm">
+    <div
+      onClick={onClick}
+      className={`rounded-2xl bg-white p-4 shadow-sm ${onClick ? "cursor-pointer active:bg-gray-50" : ""}`}
+    >
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span
