@@ -3,7 +3,7 @@ import TransactionItem from "../components/transaction/TransactionItem";
 import { useFinance } from "../hooks/useFinance";
 import { formatCurrency } from "../utils/formatCurrency";
 import { todayStr } from "../utils/formatDate";
-
+import EmptyState from "../components/ui/EmptyState";
 const field =
   "w-full rounded-xl border border-gray-300 bg-white p-3 text-sm outline-none";
 
@@ -51,7 +51,7 @@ export default function History() {
         </select>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 text-sm">
+      <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-2">
         <div className="rounded-xl bg-emerald-50 p-3">
           <p className="text-gray-600">Masuk</p>
           <p className="font-semibold text-emerald-700">
@@ -67,9 +67,21 @@ export default function History() {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="py-10 text-center text-sm text-gray-500">
-          Belum ada transaksi.
-        </p>
+        transactions.length === 0 ? (
+          <EmptyState
+            icon="🧾"
+            title="Belum ada transaksi"
+            description="Catat pemasukan atau pengeluaran pertama lu."
+            actionLabel="Catat transaksi"
+            actionTo="/add"
+          />
+        ) : (
+          <EmptyState
+            icon="🔍"
+            title="Tidak ada hasil"
+            description="Coba ganti bulan atau filter pocket."
+          />
+        )
       ) : (
         filtered.map((t) => <TransactionItem key={t.id} tx={t} />)
       )}

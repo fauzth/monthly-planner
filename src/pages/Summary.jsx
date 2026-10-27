@@ -39,7 +39,7 @@ export default function Summary() {
         className="w-full rounded-xl border border-gray-300 bg-white p-3 text-sm outline-none"
       />
 
-      <div className="grid grid-cols-3 gap-2 text-sm">
+      <div className="grid grid-cols-1 gap-2 text-sm min-[420px]:grid-cols-3">
         <div className="rounded-xl bg-emerald-50 p-3">
           <p className="text-xs text-gray-600">Masuk</p>
           <p className="font-semibold text-emerald-700">

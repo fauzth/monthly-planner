@@ -9,15 +9,15 @@ export default function PocketCard({ pocket, onClick }) {
       onClick={onClick}
       className={`rounded-2xl bg-white p-4 shadow-sm ${onClick ? "cursor-pointer active:bg-gray-50" : ""}`}
     >
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <span
-            className="h-3 w-3 rounded-full"
+            className="h-3 w-3 shrink-0 rounded-full"
             style={{ backgroundColor: pocket.color }}
           />
-          <h3 className="font-semibold">{pocket.name}</h3>
+          <h3 className="truncate font-semibold">{pocket.name}</h3>
         </div>
-        <span className="text-xs text-gray-500">
+        <span className="shrink-0 text-xs text-gray-500">
           {formatCurrency(pocket.spent)} / {formatCurrency(pocket.allocated)}
         </span>
       </div>

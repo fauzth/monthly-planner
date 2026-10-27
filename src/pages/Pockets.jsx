@@ -1,5 +1,7 @@
 import { useState } from "react";
 import Modal from "../components/ui/Modal";
+import ConfirmDialog from "../components/ui/ConfirmDialog";
+import EmptyState from "../components/ui/EmptyState";
 import PocketCard from "../components/pocket/PocketCard";
 import PocketForm from "../components/pocket/PocketForm";
 import { useFinance } from "../hooks/useFinance";
@@ -19,11 +21,13 @@ export default function Pockets() {
 
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [confirmArchive, setConfirmArchive] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
 
   const close = () => {
     setAdding(false);
     setEditing(null);
+    setConfirmArchive(false);
   };
 
   const handleSubmit = (data) => {
@@ -33,14 +37,8 @@ export default function Pockets() {
   };
 
   const handleArchive = () => {
-    if (
-      confirm(
-        `Arsipkan pocket "${editing.name}"? Sisa saldonya kembali ke belum dialokasikan.`,
-      )
-    ) {
-      archivePocket(editing.id);
-      close();
-    }
+    archivePocket(editing.id);
+    close();
   };
 
   const maxAmount = editing ? unallocated + editing.baseAllocated : unallocated;
@@ -66,15 +64,21 @@ export default function Pockets() {
         </span>
       </p>
 
-      {activePocketStats.length === 0 && (
-        <p className="py-10 text-center text-sm text-gray-500">
-          Belum ada pocket. Tekan + Pocket untuk mulai.
-        </p>
+      {activePocketStats.length === 0 ? (
+        <EmptyState
+          icon="👛"
+          title="Belum ada pocket"
+          description="Bagi gaji lu ke pocket, misalnya Makan, Transport, atau Tabungan."
+          actionLabel="Buat pocket pertama"
+          onAction={() => setAdding(true)}
+        />
+      ) : (
+        <div className="grid gap-3 md:grid-cols-2">
+          {activePocketStats.map((p) => (
+            <PocketCard key={p.id} pocket={p} onClick={() => setEditing(p)} />
+          ))}
+        </div>
       )}
-
-      {activePocketStats.map((p) => (
-        <PocketCard key={p.id} pocket={p} onClick={() => setEditing(p)} />
-      ))}
 
       {archivedPocketStats.length > 0 && (
         <div>
@@ -117,9 +121,19 @@ export default function Pockets() {
           maxAmount={maxAmount}
           totalIncome={totalIncome}
           onSubmit={handleSubmit}
-          onArchive={handleArchive}
+          onArchive={() => setConfirmArchive(true)}
         />
       </Modal>
+
+      {/* ditaruh setelah Modal supaya tampil di atasnya */}
+      <ConfirmDialog
+        open={confirmArchive}
+        title="Arsipkan pocket?"
+        message={`Pocket "${editing?.name}" akan disembunyikan. Sisa saldonya kembali ke belum dialokasikan, dan riwayat transaksinya tetap tersimpan.`}
+        confirmLabel="Arsipkan"
+        onConfirm={handleArchive}
+        onCancel={() => setConfirmArchive(false)}
+      />
     </div>
   );
 }

@@ -3,11 +3,12 @@ export default function Modal({ open, onClose, title, children }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end bg-black/40"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 md:items-center"
       onClick={onClose}
     >
       <div
-        className="mx-auto w-full max-w-md rounded-t-2xl bg-white p-5"
+        className="max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-t-2xl bg-white p-5 md:rounded-2xl"
+        style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))" }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">

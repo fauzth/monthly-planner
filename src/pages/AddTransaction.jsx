@@ -121,7 +121,7 @@ export default function AddTransaction() {
   };
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-4 p-4 md:max-w-lg">
       <h1 className="text-xl font-bold">
         {isEdit ? "Edit Transaksi" : "Catat Transaksi"}
       </h1>

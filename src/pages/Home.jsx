@@ -1,6 +1,7 @@
 import PocketCard from "../components/pocket/PocketCard";
 import { useFinance } from "../hooks/useFinance";
 import { formatCurrency } from "../utils/formatCurrency";
+import EmptyState from "../components/ui/EmptyState";
 
 export default function Home() {
   const {
@@ -17,7 +18,7 @@ export default function Home() {
         <p className="text-sm opacity-80">Total Saldo</p>
         <p className="text-3xl font-bold">{formatCurrency(balance)}</p>
 
-        <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
+        <div className="mt-4 flex flex-wrap justify-between gap-x-4 gap-y-2 text-xs">
           <div>
             <p className="opacity-80">Pemasukan</p>
             <p className="font-semibold">{formatCurrency(totalIncome)}</p>
@@ -26,7 +27,7 @@ export default function Home() {
             <p className="opacity-80">Terpakai</p>
             <p className="font-semibold">{formatCurrency(totalExpense)}</p>
           </div>
-          <div className="text-right">
+          <div>
             <p className="opacity-80">Belum dialokasi</p>
             <p className="font-semibold">{formatCurrency(unallocated)}</p>
           </div>
@@ -34,9 +35,21 @@ export default function Home() {
       </div>
 
       <h2 className="font-semibold">Pocket</h2>
-      {pocketStats.map((p) => (
-        <PocketCard key={p.id} pocket={p} />
-      ))}
+      {pocketStats.length === 0 ? (
+        <EmptyState
+          icon="👛"
+          title="Belum ada pocket"
+          description="Buat pocket untuk memisahkan keperluan pengeluaran lu."
+          actionLabel="Buat pocket"
+          actionTo="/pockets"
+        />
+      ) : (
+        <div className="grid gap-3 md:grid-cols-2">
+          {pocketStats.map((p) => (
+            <PocketCard key={p.id} pocket={p} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
