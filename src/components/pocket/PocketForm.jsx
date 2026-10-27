@@ -19,8 +19,10 @@ export default function PocketForm({
   initial,
   maxAmount,
   totalIncome,
+  canDelete,
   onSubmit,
   onArchive,
+  onDelete,
 }) {
   const [name, setName] = useState(initial?.name ?? "");
   const [nominal, setNominal] = useState(initial?.baseAllocated ?? 0);
@@ -135,6 +137,16 @@ export default function PocketForm({
           className="w-full rounded-xl border border-red-200 py-3 text-sm font-semibold text-red-600"
         >
           Arsipkan Pocket
+        </button>
+      )}
+
+      {initial && canDelete && (
+        <button
+          type="button"
+          onClick={onDelete}
+          className="w-full rounded-xl py-2 text-sm text-gray-400"
+        >
+          Hapus permanen
         </button>
       )}
     </form>

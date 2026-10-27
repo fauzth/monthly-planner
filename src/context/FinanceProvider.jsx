@@ -79,6 +79,19 @@ export function FinanceProvider({ children }) {
     [updatePocket],
   );
 
+  const deletePocket = useCallback(
+    (id) =>
+      setData((d) => {
+        const used = d.transactions.some(
+          (t) =>
+            t.pocketId === id || t.fromPocketId === id || t.toPocketId === id,
+        );
+        if (used) return d; // pocket yang punya transaksi tidak boleh dihapus
+        return { ...d, pockets: d.pockets.filter((p) => p.id !== id) };
+      }),
+    [],
+  );
+
   const addTransaction = useCallback(
     (tx) =>
       setData((d) => ({
@@ -133,6 +146,11 @@ export function FinanceProvider({ children }) {
       pocketStats,
       activePocketStats,
       archivedPocketStats,
+      usedPocketIds: new Set(
+        transactions
+          .flatMap((t) => [t.pocketId, t.fromPocketId, t.toPocketId])
+          .filter(Boolean),
+      ),
       totalIncome,
       totalExpense,
       balance: totalIncome - totalExpense,
@@ -141,6 +159,7 @@ export function FinanceProvider({ children }) {
       updatePocket,
       archivePocket,
       restorePocket,
+      deletePocket,
       addTransaction,
       updateTransaction,
       deleteTransaction,
@@ -151,6 +170,7 @@ export function FinanceProvider({ children }) {
     updatePocket,
     archivePocket,
     restorePocket,
+    deletePocket,
     addTransaction,
     updateTransaction,
     deleteTransaction,

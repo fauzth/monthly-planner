@@ -13,21 +13,25 @@ export default function Pockets() {
     archivedPocketStats,
     totalIncome,
     unallocated,
+    usedPocketIds,
     addPocket,
     updatePocket,
     archivePocket,
     restorePocket,
+    deletePocket,
   } = useFinance();
 
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState(null);
   const [confirmArchive, setConfirmArchive] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const close = () => {
     setAdding(false);
     setEditing(null);
     setConfirmArchive(false);
+    setConfirmDelete(false);
   };
 
   const handleSubmit = (data) => {
@@ -120,12 +124,13 @@ export default function Pockets() {
           initial={editing}
           maxAmount={maxAmount}
           totalIncome={totalIncome}
+          canDelete={editing ? !usedPocketIds.has(editing.id) : false}
           onSubmit={handleSubmit}
           onArchive={() => setConfirmArchive(true)}
+          onDelete={() => setConfirmDelete(true)}
         />
       </Modal>
 
-      {/* ditaruh setelah Modal supaya tampil di atasnya */}
       <ConfirmDialog
         open={confirmArchive}
         title="Arsipkan pocket?"
@@ -133,6 +138,17 @@ export default function Pockets() {
         confirmLabel="Arsipkan"
         onConfirm={handleArchive}
         onCancel={() => setConfirmArchive(false)}
+      />
+
+      <ConfirmDialog
+        open={confirmDelete}
+        title="Hapus pocket permanen?"
+        message={`Pocket "${editing?.name}" belum punya transaksi dan akan dihapus selamanya. Tindakan ini tidak bisa dibatalkan.`}
+        onConfirm={() => {
+          deletePocket(editing.id);
+          close();
+        }}
+        onCancel={() => setConfirmDelete(false)}
       />
     </div>
   );
