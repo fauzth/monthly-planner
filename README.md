@@ -13,5 +13,5 @@ Aplikasi web mobile-first untuk merencanakan gaji bulanan dengan sistem pocket.
 React (Vite), JavaScript, Tailwind CSS, React Router, Supabase (rencana)
 
 ## Menjalankan
-npm install
+npm install 
 npm run dev
