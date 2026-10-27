@@ -1,79 +1,100 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FinanceContext } from "./FinanceContext";
+import { useAuth } from "../hooks/useAuth";
 import { getPocketStats } from "../utils/calculateBalance";
-import { todayStr } from "../utils/formatDate";
-import { newId } from "../utils/id";
+import {
+  fetchPockets,
+  createPocket,
+  updatePocketById,
+  deletePocketById,
+} from "../services/pocketService";
+import {
+  fetchTransactions,
+  createTransaction,
+  updateTransactionById,
+  deleteTransactionById,
+} from "../services/transactionService";
 
-const STORAGE_KEY = "monthly-planner-data";
-
-const seed = {
-  pockets: [
-    { id: "p1", name: "Makan", allocated: 1500000, color: "#f59e0b" },
-    { id: "p2", name: "Transport", allocated: 500000, color: "#3b82f6" },
-    { id: "p3", name: "Tabungan", allocated: 1000000, color: "#10b981" },
-  ],
-  transactions: [
-    {
-      id: "t1",
-      type: "income",
-      amount: 5000000,
-      note: "Gaji bulanan",
-      date: todayStr(),
-    },
-    {
-      id: "t2",
-      type: "expense",
-      amount: 35000,
-      pocketId: "p1",
-      note: "Makan siang",
-      date: todayStr(),
-    },
-  ],
-};
-
-const load = () => {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : seed;
-  } catch {
-    return seed;
-  }
-};
+const empty = { pockets: [], transactions: [] };
 
 export function FinanceProvider({ children }) {
-  const [data, setData] = useState(load);
+  const { user } = useAuth();
+  const userId = user?.id;
 
+  const [store, setData] = useState({
+    ownerId: null,
+    pockets: [],
+    transactions: [],
+  });
+  const [error, setError] = useState("");
+
+  // data hanya dianggap valid kalau milik user yang sedang login
+  const data = store.ownerId === userId ? store : empty;
+  const loading = Boolean(userId) && store.ownerId !== userId;
+
+  // muat data tiap kali user berganti (login / ganti akun)
   useEffect(() => {
+    if (!userId) return;
+
+    let cancelled = false;
+
+    Promise.all([fetchPockets(), fetchTransactions()])
+      .then(([pockets, transactions]) => {
+        if (!cancelled) setData({ ownerId: userId, pockets, transactions });
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        setError(e.message || "Gagal memuat data.");
+        // tandai sudah "selesai" supaya loading tidak menggantung
+        setData({ ownerId: userId, pockets: [], transactions: [] });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  // bungkus aksi: tangkap error supaya tampil sebagai banner, bukan crash
+  const run = useCallback(async (fn) => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    } catch {
-      // abaikan kalau storage penuh/diblokir
+      setError("");
+      await fn();
+    } catch (e) {
+      setError(
+        e.code === "23503"
+          ? "Pocket ini masih punya transaksi, jadi tidak bisa dihapus. Arsipkan saja."
+          : e.message || "Terjadi kesalahan.",
+      );
     }
-  }, [data]);
+  }, []);
+
+  const clearError = useCallback(() => setError(""), []);
 
   const addPocket = useCallback(
     (pocket) =>
-      setData((d) => ({
-        ...d,
-        pockets: [...d.pockets, { id: newId(), ...pocket }],
-      })),
-    [],
+      run(async () => {
+        const created = await createPocket(pocket);
+        setData((d) => ({ ...d, pockets: [...d.pockets, created] }));
+      }),
+    [run],
   );
 
   const updatePocket = useCallback(
     (id, changes) =>
-      setData((d) => ({
-        ...d,
-        pockets: d.pockets.map((p) => (p.id === id ? { ...p, ...changes } : p)),
-      })),
-    [],
+      run(async () => {
+        const updated = await updatePocketById(id, changes);
+        setData((d) => ({
+          ...d,
+          pockets: d.pockets.map((p) => (p.id === id ? updated : p)),
+        }));
+      }),
+    [run],
   );
 
   const archivePocket = useCallback(
     (id) => updatePocket(id, { archived: true }),
     [updatePocket],
   );
-
   const restorePocket = useCallback(
     (id) => updatePocket(id, { archived: false }),
     [updatePocket],
@@ -81,44 +102,47 @@ export function FinanceProvider({ children }) {
 
   const deletePocket = useCallback(
     (id) =>
-      setData((d) => {
-        const used = d.transactions.some(
-          (t) =>
-            t.pocketId === id || t.fromPocketId === id || t.toPocketId === id,
-        );
-        if (used) return d; // pocket yang punya transaksi tidak boleh dihapus
-        return { ...d, pockets: d.pockets.filter((p) => p.id !== id) };
+      run(async () => {
+        await deletePocketById(id); // ditolak database kalau pocket masih punya transaksi
+        setData((d) => ({
+          ...d,
+          pockets: d.pockets.filter((p) => p.id !== id),
+        }));
       }),
-    [],
+    [run],
   );
 
   const addTransaction = useCallback(
     (tx) =>
-      setData((d) => ({
-        ...d,
-        transactions: [{ id: newId(), ...tx }, ...d.transactions],
-      })),
-    [],
+      run(async () => {
+        const created = await createTransaction(tx);
+        setData((d) => ({ ...d, transactions: [created, ...d.transactions] }));
+      }),
+    [run],
   );
 
   const updateTransaction = useCallback(
     (id, tx) =>
-      setData((d) => ({
-        ...d,
-        transactions: d.transactions.map((t) =>
-          t.id === id ? { id, ...tx } : t,
-        ),
-      })),
-    [],
+      run(async () => {
+        const updated = await updateTransactionById(id, tx);
+        setData((d) => ({
+          ...d,
+          transactions: d.transactions.map((t) => (t.id === id ? updated : t)),
+        }));
+      }),
+    [run],
   );
 
   const deleteTransaction = useCallback(
     (id) =>
-      setData((d) => ({
-        ...d,
-        transactions: d.transactions.filter((t) => t.id !== id),
-      })),
-    [],
+      run(async () => {
+        await deleteTransactionById(id);
+        setData((d) => ({
+          ...d,
+          transactions: d.transactions.filter((t) => t.id !== id),
+        }));
+      }),
+    [run],
   );
 
   const value = useMemo(() => {
@@ -141,6 +165,9 @@ export function FinanceProvider({ children }) {
       archivedPocketStats.reduce((s, p) => s + p.spent, 0);
 
     return {
+      loading,
+      error,
+      clearError,
       pockets,
       transactions,
       pocketStats,
@@ -166,6 +193,9 @@ export function FinanceProvider({ children }) {
     };
   }, [
     data,
+    loading,
+    error,
+    clearError,
     addPocket,
     updatePocket,
     archivePocket,
