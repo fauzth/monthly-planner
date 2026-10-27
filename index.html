@@ -1,12 +1,28 @@
 <!doctype html>
-<html lang="en">
+<html lang="id">
   <head>
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("theme");
+          var dark =
+            t === "dark" ||
+            (t !== "light" &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          document.documentElement.dataset.theme = dark ? "dark" : "light";
+        } catch (e) {}
+      })();
+    </script>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
     <meta name="theme-color" content="#10b981" />
+    <meta
+      name="description"
+      content="Monthly Planner: aplikasi planner keuangan bulanan dengan sistem pocket."
+    />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />

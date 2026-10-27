@@ -12,10 +12,13 @@ export default function CurrencyInput({
   };
 
   return (
-    <div className="flex items-center rounded-xl border border-gray-300 bg-white px-3 focus-within:ring-2 focus-within:ring-emerald-500">
-      <span className="text-gray-500">Rp</span>
+    <div className="flex items-center rounded-xl border border-line bg-surface px-3 focus-within:ring-2 focus-within:ring-primary">
+      <span aria-hidden="true" className="text-fg-muted">
+        Rp
+      </span>
       <input
         inputMode="numeric"
+        autoComplete="off"
         value={display}
         onChange={handleChange}
         placeholder={placeholder}

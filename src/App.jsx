@@ -6,7 +6,8 @@ import Home from "./pages/Home";
 import Pockets from "./pages/Pockets";
 import AddTransaction from "./pages/AddTransaction";
 import History from "./pages/History";
-import Summary from "./pages/Summary";
+import { lazy, Suspense } from "react";
+const Summary = lazy(() => import("./pages/Summary"));
 
 export default function App() {
   return (
@@ -21,7 +22,20 @@ export default function App() {
             <Route path="/add" element={<AddTransaction key="new" />} />
             <Route path="/edit/:id" element={<AddTransaction key="edit" />} />
             <Route path="/history" element={<History />} />
-            <Route path="/summary" element={<Summary />} />
+            <Route
+              path="/summary"
+              element={
+                <Suspense
+                  fallback={
+                    <p className="p-8 text-center text-sm border-line">
+                      Memuat...
+                    </p>
+                  }
+                >
+                  <Summary />
+                </Suspense>
+              }
+            />
           </Route>
         </Route>
       </Routes>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Plus } from "lucide-react";
 import Modal from "../components/ui/Modal";
 import ConfirmDialog from "../components/ui/ConfirmDialog";
 import EmptyState from "../components/ui/EmptyState";
@@ -49,70 +50,89 @@ export default function Pockets() {
 
   return (
     <div className="space-y-4 p-4">
-      <div className="flex items-center justify-between">
+      <title>Pocket | Monthly Planner</title>
+
+      <div className="flex items-center justify-between gap-3">
         <h1 className="text-xl font-bold">Pocket</h1>
         <button
+          type="button"
           onClick={() => setAdding(true)}
-          className="rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
+          aria-label="Tambah pocket"
+          className="flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-on-primary hover:bg-primary-hover active:bg-primary-hover"
         >
-          + Pocket
+          <Plus size={16} aria-hidden="true" /> Pocket
         </button>
       </div>
 
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-fg-muted">
         Belum dialokasikan:{" "}
         <span
-          className={`font-semibold ${unallocated < 0 ? "text-red-600" : ""}`}
+          className={`font-semibold ${unallocated < 0 ? "text-danger" : "text-fg"}`}
         >
           {formatCurrency(unallocated)}
         </span>
       </p>
 
-      {activePocketStats.length === 0 ? (
-        <EmptyState
-          icon="👛"
-          title="Belum ada pocket"
-          description="Bagi gaji lu ke pocket, misalnya Makan, Transport, atau Tabungan."
-          actionLabel="Buat pocket pertama"
-          onAction={() => setAdding(true)}
-        />
-      ) : (
-        <div className="grid gap-3 md:grid-cols-2">
-          {activePocketStats.map((p) => (
-            <PocketCard key={p.id} pocket={p} onClick={() => setEditing(p)} />
-          ))}
-        </div>
-      )}
+      <section aria-labelledby="active-pockets-title">
+        <h2 id="active-pockets-title" className="sr-only">
+          Pocket aktif
+        </h2>
+
+        {activePocketStats.length === 0 ? (
+          <EmptyState
+            icon="👛"
+            title="Belum ada pocket"
+            description="Bagi gaji lu ke pocket, misalnya Makan, Transport, atau Tabungan."
+            actionLabel="Buat pocket pertama"
+            onAction={() => setAdding(true)}
+          />
+        ) : (
+          <ul className="grid gap-3 md:grid-cols-2">
+            {activePocketStats.map((p) => (
+              <li key={p.id}>
+                <PocketCard pocket={p} onClick={() => setEditing(p)} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       {archivedPocketStats.length > 0 && (
-        <div>
+        <section>
           <button
+            type="button"
             onClick={() => setShowArchived((v) => !v)}
-            className="text-sm text-gray-500"
+            aria-expanded={showArchived}
+            aria-controls="archived-pockets"
+            className="text-sm text-fg-muted underline-offset-2 hover:underline"
           >
             {showArchived ? "Sembunyikan" : "Tampilkan"} arsip (
             {archivedPocketStats.length})
           </button>
 
-          {showArchived && (
-            <div className="mt-2 space-y-2">
-              {archivedPocketStats.map((p) => (
-                <div
-                  key={p.id}
-                  className="flex items-center justify-between rounded-xl bg-gray-100 p-3 text-sm"
+          <ul
+            id="archived-pockets"
+            hidden={!showArchived}
+            className="mt-2 space-y-2"
+          >
+            {archivedPocketStats.map((p) => (
+              <li
+                key={p.id}
+                className="flex items-center justify-between gap-3 rounded-xl bg-surface-muted p-3 text-sm"
+              >
+                <span className="min-w-0 truncate text-fg-muted">{p.name}</span>
+                <button
+                  type="button"
+                  onClick={() => restorePocket(p.id)}
+                  aria-label={`Pulihkan pocket ${p.name}`}
+                  className="shrink-0 font-semibold text-primary"
                 >
-                  <span className="text-gray-600">{p.name}</span>
-                  <button
-                    onClick={() => restorePocket(p.id)}
-                    className="font-semibold text-emerald-600"
-                  >
-                    Pulihkan
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                  Pulihkan
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       <Modal

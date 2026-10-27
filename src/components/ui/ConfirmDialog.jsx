@@ -1,3 +1,4 @@
+import { useId } from "react";
 import Modal from "./Modal";
 
 export default function ConfirmDialog({
@@ -9,22 +10,36 @@ export default function ConfirmDialog({
   onConfirm,
   onCancel,
 }) {
+  const messageId = useId();
+
   return (
-    <Modal open={open} onClose={onCancel} title={title}>
-      <p className="mb-5 text-sm text-gray-600">{message}</p>
+    <Modal
+      open={open}
+      onClose={onCancel}
+      title={title}
+      role="alertdialog"
+      descriptionId={messageId}
+    >
+      <p id={messageId} className="mb-5 text-sm text-fg-muted">
+        {message}
+      </p>
+
       <div className="grid grid-cols-2 gap-3">
         <button
+          type="button"
+          data-autofocus
           onClick={onCancel}
-          className="rounded-xl border border-gray-300 py-3 text-sm font-semibold text-gray-600"
+          className="rounded-xl border border-line py-3 text-sm font-semibold text-fg hover:bg-surface-muted"
         >
           Batal
         </button>
         <button
+          type="button"
           onClick={onConfirm}
-          className={`rounded-xl py-3 text-sm font-semibold text-white ${
+          className={`rounded-xl py-3 text-sm font-semibold ${
             danger
-              ? "bg-red-600 active:bg-red-700"
-              : "bg-emerald-600 active:bg-emerald-700"
+              ? "bg-danger text-on-danger hover:bg-danger-hover active:bg-danger-hover"
+              : "bg-primary text-on-primary hover:bg-primary-hover active:bg-primary-hover"
           }`}
         >
           {confirmLabel}

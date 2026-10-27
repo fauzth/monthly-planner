@@ -6,7 +6,10 @@ export default function ProtectedRoute() {
 
   if (loading) {
     return (
-      <div className="flex min-h-dvh items-center justify-center text-sm text-gray-500">
+      <div
+        role="status"
+        className="flex min-h-dvh items-center justify-center text-sm text-fg-muted"
+      >
         Memuat...
       </div>
     );

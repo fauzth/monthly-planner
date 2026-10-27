@@ -4,7 +4,8 @@ import { useAuth } from "../hooks/useAuth";
 import { signIn, signUp } from "../services/authService";
 
 const field =
-  "w-full rounded-xl border border-gray-300 bg-white p-3 outline-none focus:ring-2 focus:ring-emerald-500";
+  "w-full rounded-xl border border-line bg-surface p-3 outline-none focus:ring-2 focus:ring-primary";
+const label = "mb-1 block text-sm text-fg-muted";
 
 export default function Login() {
   const { user, loading } = useAuth();
@@ -52,24 +53,28 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-gray-50 p-4">
+    <main className="flex min-h-dvh items-center justify-center bg-page p-4">
+      <title>{`${isLogin ? "Masuk" : "Daftar"} | Monthly Planner`}</title>
+
       <div className="w-full max-w-sm space-y-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-emerald-600">
-            Monthly Planner
-          </h1>
-          <p className="mt-1 text-sm text-gray-500">
+        <header className="text-center">
+          <h1 className="text-2xl font-bold text-primary">Monthly Planner</h1>
+          <p className="mt-1 text-sm text-fg-muted">
             {isLogin ? "Masuk untuk melanjutkan" : "Buat akun baru"}
           </p>
-        </div>
+        </header>
 
         <form
           onSubmit={handleSubmit}
-          className="space-y-4 rounded-2xl bg-white p-5 shadow-sm"
+          aria-label={isLogin ? "Form masuk" : "Form daftar"}
+          className="space-y-4 rounded-2xl border border-line bg-surface p-5 shadow-sm"
         >
           <div>
-            <label className="mb-1 block text-sm text-gray-600">Email</label>
+            <label htmlFor="auth-email" className={label}>
+              Email
+            </label>
             <input
+              id="auth-email"
               type="email"
               required
               autoComplete="email"
@@ -80,8 +85,11 @@ export default function Login() {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm text-gray-600">Password</label>
+            <label htmlFor="auth-password" className={label}>
+              Password
+            </label>
             <input
+              id="auth-password"
               type="password"
               required
               autoComplete={isLogin ? "current-password" : "new-password"}
@@ -91,28 +99,38 @@ export default function Login() {
             />
           </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          {info && <p className="text-sm text-emerald-700">{info}</p>}
+          {error && (
+            <p role="alert" className="text-sm text-danger">
+              {error}
+            </p>
+          )}
+          {info && (
+            <p role="status" className="text-sm text-primary">
+              {info}
+            </p>
+          )}
 
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-xl bg-emerald-600 py-3 font-semibold text-white active:bg-emerald-700 disabled:opacity-60"
+            aria-busy={submitting}
+            className="w-full rounded-xl bg-primary py-3 font-semibold text-on-primary hover:bg-primary-hover active:bg-primary-hover disabled:opacity-60"
           >
             {submitting ? "Memproses..." : isLogin ? "Masuk" : "Daftar"}
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-600">
+        <p className="text-center text-sm text-fg-muted">
           {isLogin ? "Belum punya akun?" : "Sudah punya akun?"}{" "}
           <button
+            type="button"
             onClick={switchMode}
-            className="font-semibold text-emerald-600"
+            className="font-semibold text-primary"
           >
             {isLogin ? "Daftar" : "Masuk"}
           </button>
         </p>
       </div>
-    </div>
+    </main>
   );
 }

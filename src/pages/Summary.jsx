@@ -16,9 +16,11 @@ export default function Summary() {
 
   const expenses = monthTx.filter((t) => t.type === "expense");
   const totalExpense = expenses.reduce((s, t) => s + t.amount, 0);
+  const balance = totalIncome - totalExpense;
 
   const byPocket = pockets
     .map((p) => ({
+      id: p.id,
       name: p.name,
       color: p.color,
       value: expenses
@@ -28,50 +30,74 @@ export default function Summary() {
     .filter((d) => d.value > 0)
     .sort((a, b) => b.value - a.value);
 
+  const stats = [
+    {
+      label: "Masuk",
+      value: totalIncome,
+      box: "bg-primary-soft",
+      text: "text-primary-soft-fg",
+    },
+    {
+      label: "Keluar",
+      value: totalExpense,
+      box: "bg-danger-soft",
+      text: "text-danger-soft-fg",
+    },
+    {
+      label: "Sisa",
+      value: balance,
+      box: "bg-surface-muted",
+      text: balance < 0 ? "text-danger-soft-fg" : "text-fg",
+    },
+  ];
+
   return (
     <div className="space-y-4 p-4">
       <h1 className="text-xl font-bold">Ringkasan</h1>
 
-      <input
-        type="month"
-        value={month}
-        onChange={(e) => setMonth(e.target.value)}
-        className="w-full rounded-xl border border-gray-300 bg-white p-3 text-sm outline-none"
-      />
-
-      <div className="grid grid-cols-1 gap-2 text-sm min-[420px]:grid-cols-3">
-        <div className="rounded-xl bg-emerald-50 p-3">
-          <p className="text-xs text-gray-600">Masuk</p>
-          <p className="font-semibold text-emerald-700">
-            {formatCurrency(totalIncome)}
-          </p>
-        </div>
-        <div className="rounded-xl bg-red-50 p-3">
-          <p className="text-xs text-gray-600">Keluar</p>
-          <p className="font-semibold text-red-700">
-            {formatCurrency(totalExpense)}
-          </p>
-        </div>
-        <div className="rounded-xl bg-gray-100 p-3">
-          <p className="text-xs text-gray-600">Sisa</p>
-          <p
-            className={`font-semibold ${totalIncome - totalExpense < 0 ? "text-red-700" : "text-gray-900"}`}
-          >
-            {formatCurrency(totalIncome - totalExpense)}
-          </p>
-        </div>
+      <div>
+        <label
+          htmlFor="summary-month"
+          className="mb-1 block text-sm text-fg-muted"
+        >
+          Bulan
+        </label>
+        <input
+          id="summary-month"
+          type="month"
+          value={month}
+          onChange={(e) => setMonth(e.target.value)}
+          className="w-full rounded-xl border border-line bg-surface p-3 outline-none focus:ring-2 focus:ring-primary"
+        />
       </div>
 
-      <div className="rounded-2xl bg-white p-4 shadow-sm">
-        <h2 className="mb-2 font-semibold">Pengeluaran per Pocket</h2>
+      <dl className="grid grid-cols-1 gap-2 text-sm min-[420px]:grid-cols-3">
+        {stats.map((s) => (
+          <div key={s.label} className={`rounded-xl p-3 ${s.box}`}>
+            <dt className="text-xs text-fg-muted">{s.label}</dt>
+            <dd className={`font-semibold ${s.text}`}>
+              {formatCurrency(s.value)}
+            </dd>
+          </div>
+        ))}
+      </dl>
+
+      <section
+        aria-labelledby="pocket-chart-title"
+        className="rounded-2xl border border-line bg-surface p-4 shadow-sm"
+      >
+        <h2 id="pocket-chart-title" className="mb-2 font-semibold">
+          Pengeluaran per Pocket
+        </h2>
 
         {byPocket.length === 0 ? (
-          <p className="py-8 text-center text-sm text-gray-500">
+          <p className="py-8 text-center text-sm text-fg-muted">
             Belum ada pengeluaran di bulan ini.
           </p>
         ) : (
           <>
-            <div className="h-56">
+            {/* chart bersifat visual saja; datanya sudah ada di daftar di bawah */}
+            <div className="h-56" aria-hidden="true">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -81,12 +107,22 @@ export default function Summary() {
                     innerRadius={55}
                     outerRadius={85}
                     paddingAngle={2}
+                    stroke="var(--color-surface)"
                   >
                     {byPocket.map((d) => (
-                      <Cell key={d.name} fill={d.color} />
+                      <Cell key={d.id} fill={d.color} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(v) => formatCurrency(v)} />
+                  <Tooltip
+                    formatter={(v) => formatCurrency(v)}
+                    contentStyle={{
+                      background: "var(--color-surface)",
+                      border: "1px solid var(--color-line)",
+                      borderRadius: 12,
+                      color: "var(--color-fg)",
+                    }}
+                    itemStyle={{ color: "var(--color-fg)" }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -94,19 +130,20 @@ export default function Summary() {
             <ul className="mt-2 space-y-2">
               {byPocket.map((d) => (
                 <li
-                  key={d.name}
-                  className="flex items-center justify-between text-sm"
+                  key={d.id}
+                  className="flex items-center justify-between gap-3 text-sm"
                 >
-                  <span className="flex items-center gap-2">
+                  <span className="flex min-w-0 items-center gap-2">
                     <span
-                      className="h-3 w-3 rounded-full"
+                      aria-hidden="true"
+                      className="h-3 w-3 shrink-0 rounded-full"
                       style={{ backgroundColor: d.color }}
                     />
-                    {d.name}
+                    <span className="truncate">{d.name}</span>
                   </span>
-                  <span className="text-gray-600">
+                  <span className="shrink-0 text-fg-muted">
                     {formatCurrency(d.value)}{" "}
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs">
                       ({Math.round((d.value / totalExpense) * 100)}%)
                     </span>
                   </span>
@@ -115,7 +152,7 @@ export default function Summary() {
             </ul>
           </>
         )}
-      </div>
+      </section>
     </div>
   );
 }

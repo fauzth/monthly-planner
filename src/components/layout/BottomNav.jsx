@@ -12,10 +12,11 @@ const items = [
 export default function BottomNav() {
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white md:inset-x-auto md:inset-y-0 md:left-0 md:w-56 md:border-r md:border-t-0"
+      aria-label="Navigasi utama"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface md:inset-x-auto md:inset-y-0 md:left-0 md:w-56 md:border-r md:border-t-0"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <p className="hidden px-5 pb-4 pt-6 text-lg font-bold text-emerald-600 md:block">
+      <p className="hidden px-5 pb-4 pt-6 text-lg font-bold text-primary md:block">
         Monthly Planner
       </p>
 
@@ -28,12 +29,12 @@ export default function BottomNav() {
               className={({ isActive }) =>
                 `flex flex-col items-center gap-0.5 py-2 text-[11px] md:flex-row md:gap-3 md:rounded-xl md:px-3 md:py-2.5 md:text-sm ${
                   isActive
-                    ? "font-semibold text-emerald-600 md:bg-emerald-50"
-                    : "text-gray-500"
+                    ? "font-semibold text-primary md:bg-primary-soft md:text-primary-soft-fg"
+                    : "text-fg-muted hover:text-fg"
                 }`
               }
             >
-              <Icon size={22} />
+              <Icon size={22} aria-hidden="true" />
               {label}
             </NavLink>
           </li>

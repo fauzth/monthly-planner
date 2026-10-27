@@ -1,5 +1,68 @@
 @import "tailwindcss";
 
+@theme {
+  /* permukaan dan teks */
+  --color-page: #f9fafb;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f3f4f6;
+  --color-line: #d1d5db;
+  --color-fg: #111827;
+  --color-fg-muted: #4b5563;
+
+  /* brand */
+  --color-primary: #047857;
+  --color-primary-hover: #065f46;
+  --color-on-primary: #ffffff;
+  --color-primary-soft: #ecfdf5;
+  --color-primary-soft-fg: #047857;
+
+  /* bahaya / error */
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
+  --color-on-danger: #ffffff;
+  --color-danger-soft: #fef2f2;
+  --color-danger-soft-fg: #b91c1c;
+
+  /* peringatan */
+  --color-warning-soft: #fffbeb;
+  --color-warning-soft-fg: #92400e;
+
+  /* status progress pocket */
+  --color-ok: #10b981;
+  --color-warn: #facc15;
+  --color-bad: #ef4444;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-page: #0b1220;
+  --color-surface: #162032;
+  --color-surface-muted: #243146;
+  --color-line: #334155;
+  --color-fg: #f1f5f9;
+  --color-fg-muted: #94a3b8;
+
+  --color-primary: #10b981;
+  --color-primary-hover: #34d399;
+  --color-on-primary: #052e24;
+  --color-primary-soft: #12352b;
+  --color-primary-soft-fg: #6ee7b7;
+
+  --color-danger: #f87171;
+  --color-danger-hover: #fca5a5;
+  --color-on-danger: #450a0a;
+  --color-danger-soft: #3f1d1d;
+  --color-danger-soft-fg: #fca5a5;
+
+  --color-warning-soft: #3b2f0b;
+  --color-warning-soft-fg: #fcd34d;
+
+  --color-ok: #34d399;
+  --color-warn: #facc15;
+  --color-bad: #f87171;
+}
+
 html,
 body,
 #root {
@@ -7,20 +70,18 @@ body,
 }
 
 body {
-  background-color: #f9fafb;
+  @apply bg-page text-fg;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
 }
 
-/* 16px mencegah iOS zoom otomatis saat input difokus.
-   Sengaja di luar @layer supaya menang atas class text-sm dkk. */
+/* 16px mencegah iOS zoom otomatis saat input difokus */
 input,
 select,
 textarea {
   font-size: 16px;
 }
 
-/* Input tanggal di iOS sering mengecil */
 input[type="date"],
 input[type="month"] {
   display: block;

@@ -17,7 +17,8 @@ const TYPES = [
 ];
 
 const field =
-  "w-full rounded-xl border border-gray-300 bg-white p-3 outline-none focus:ring-2 focus:ring-emerald-500";
+  "w-full rounded-xl border border-line bg-surface p-3 outline-none focus:ring-2 focus:ring-primary";
+const label = "mb-1 block text-sm text-fg-muted";
 
 export default function AddTransaction() {
   const { pocketStats, transactions, addTransaction, updateTransaction } =
@@ -46,8 +47,9 @@ export default function AddTransaction() {
   if (isEdit && !editing) {
     return (
       <div className="space-y-3 p-4">
-        <p className="text-sm text-gray-600">Transaksi tidak ditemukan.</p>
-        <Link to="/history" className="font-semibold text-emerald-600">
+        <title>Transaksi tidak ditemukan | Monthly Planner</title>
+        <p className="text-sm text-fg-muted">Transaksi tidak ditemukan.</p>
+        <Link to="/history" className="font-semibold text-primary">
           Kembali ke History
         </Link>
       </div>
@@ -76,6 +78,7 @@ export default function AddTransaction() {
 
   const overspend = type === "expense" && source && amount > remaining;
   const needPocket = type !== "income";
+  const pageTitle = isEdit ? "Edit Transaksi" : "Catat Transaksi";
 
   const changeType = (t) => {
     if (isEdit) return;
@@ -122,54 +125,67 @@ export default function AddTransaction() {
 
   return (
     <div className="space-y-4 p-4 md:max-w-lg">
-      <h1 className="text-xl font-bold">
-        {isEdit ? "Edit Transaksi" : "Catat Transaksi"}
+      <title>{`${pageTitle} | Monthly Planner`}</title>
+      <h1 id="tx-title" className="text-xl font-bold">
+        {pageTitle}
       </h1>
 
-      <div className="grid grid-cols-3 gap-1 rounded-xl bg-gray-200 p-1">
+      <fieldset className="grid grid-cols-3 gap-1 rounded-xl bg-surface-muted p-1">
+        <legend className="sr-only">Jenis transaksi</legend>
         {TYPES.map((t) => (
-          <button
-            key={t.key}
-            type="button"
-            onClick={() => changeType(t.key)}
-            disabled={isEdit && type !== t.key}
-            className={`rounded-lg py-2 text-sm font-medium ${
-              type === t.key ? "bg-white shadow-sm" : "text-gray-600"
-            } ${isEdit && type !== t.key ? "opacity-40" : ""}`}
-          >
-            {t.label}
-          </button>
+          <label key={t.key} className="relative">
+            <input
+              type="radio"
+              name="tx-type"
+              value={t.key}
+              checked={type === t.key}
+              onChange={() => changeType(t.key)}
+              disabled={isEdit && type !== t.key}
+              className="peer sr-only"
+            />
+            <span className="block cursor-pointer rounded-lg py-2 text-center text-sm font-medium text-fg-muted peer-checked:bg-surface peer-checked:text-fg peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-disabled:cursor-not-allowed peer-disabled:opacity-40">
+              {t.label}
+            </span>
+          </label>
         ))}
-      </div>
+      </fieldset>
 
       {needPocket && options.length === 0 ? (
-        <p className="rounded-xl bg-white p-4 text-sm text-gray-600">
+        <p className="rounded-xl border border-line bg-surface p-4 text-sm text-fg-muted">
           Belum ada pocket.{" "}
-          <Link to="/pockets" className="font-semibold text-emerald-600">
+          <Link to="/pockets" className="font-semibold text-primary">
             Buat pocket dulu
           </Link>
         </p>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          aria-labelledby="tx-title"
+          className="space-y-4"
+        >
           <div>
-            <label className="mb-1 block text-sm text-gray-600">Nominal</label>
-            <CurrencyInput value={amount} onChange={setAmount} />
+            <label htmlFor="tx-amount" className={label}>
+              Nominal
+            </label>
+            <CurrencyInput id="tx-amount" value={amount} onChange={setAmount} />
           </div>
 
           {type === "income" && (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-fg-muted">
               Pemasukan masuk ke saldo utama.
             </p>
           )}
 
           {needPocket && (
             <div>
-              <label className="mb-1 block text-sm text-gray-600">
+              <label htmlFor="tx-pocket" className={label}>
                 {type === "transfer" ? "Dari pocket" : "Pocket"}
               </label>
               <select
+                id="tx-pocket"
                 value={pocketId}
                 onChange={(e) => setPocketId(e.target.value)}
+                aria-describedby={overspend ? "tx-overspend" : undefined}
                 className={field}
               >
                 <option value="">Pilih pocket</option>
@@ -192,7 +208,7 @@ export default function AddTransaction() {
                 })}
               </select>
               {overspend && (
-                <p className="mt-1 text-xs text-red-600">
+                <p id="tx-overspend" className="mt-1 text-xs text-danger">
                   Melebihi sisa pocket ({formatCurrency(remaining)}), saldo akan
                   minus.
                 </p>
@@ -202,10 +218,11 @@ export default function AddTransaction() {
 
           {type === "transfer" && (
             <div>
-              <label className="mb-1 block text-sm text-gray-600">
+              <label htmlFor="tx-to-pocket" className={label}>
                 Ke pocket
               </label>
               <select
+                id="tx-to-pocket"
                 value={toPocketId}
                 onChange={(e) => setToPocketId(e.target.value)}
                 className={field}
@@ -224,20 +241,25 @@ export default function AddTransaction() {
           )}
 
           <div>
-            <label className="mb-1 block text-sm text-gray-600">
+            <label htmlFor="tx-note" className={label}>
               Catatan (opsional)
             </label>
             <input
+              id="tx-note"
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="contoh: makan siang"
+              autoComplete="off"
               className={field}
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm text-gray-600">Tanggal</label>
+            <label htmlFor="tx-date" className={label}>
+              Tanggal
+            </label>
             <input
+              id="tx-date"
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
@@ -245,11 +267,15 @@ export default function AddTransaction() {
             />
           </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && (
+            <p role="alert" className="text-sm text-danger">
+              {error}
+            </p>
+          )}
 
           <button
             type="submit"
-            className="w-full rounded-xl bg-emerald-600 py-3 font-semibold text-white active:bg-emerald-700"
+            className="w-full rounded-xl bg-primary py-3 font-semibold text-on-primary hover:bg-primary-hover active:bg-primary-hover"
           >
             {isEdit ? "Simpan Perubahan" : "Simpan"}
           </button>
@@ -258,7 +284,7 @@ export default function AddTransaction() {
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="w-full rounded-xl border border-gray-300 py-3 text-sm font-semibold text-gray-600"
+              className="w-full rounded-xl border border-line py-3 text-sm font-semibold text-fg-muted"
             >
               Batal
             </button>
