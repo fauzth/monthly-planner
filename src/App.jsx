@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import Pockets from "./pages/Pockets";
 import AddTransaction from "./pages/AddTransaction";
 import History from "./pages/History";
+import About from "./pages/About";
 import { lazy, Suspense } from "react";
 const Summary = lazy(() => import("./pages/Summary"));
 
@@ -22,6 +23,7 @@ export default function App() {
             <Route path="/add" element={<AddTransaction key="new" />} />
             <Route path="/edit/:id" element={<AddTransaction key="edit" />} />
             <Route path="/history" element={<History />} />
+            <Route path="/about" element={<About />} />
             <Route
               path="/summary"
               element={
