@@ -96,4 +96,4 @@ For easier local testing you can turn off *Confirm email* under *Authentication 
 
 ## License
 
-[MIT](LICENSE) © Fadli Ahmd Fauzi
+Made by © Fadli Ahmd Fauzi
