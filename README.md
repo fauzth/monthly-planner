@@ -2,7 +2,7 @@
 
 A mobile-first web app for planning a monthly salary with **pockets**: split your income into spending categories, log every transaction, and watch each pocket's balance update automatically.
 
-**[Live demo](https://monthly-planner-one.vercel.app/)** · Installable as a PWA · Light and dark mode
+**[Live demo](https://monthly-planner-one.vercel.app/)** · Use demo account (Username: demo@gmail.com | Password: 123456) · Installable as a PWA · Light and dark mode 
 
 <p>
   <img src="docs/screenshots/home.png" alt="Home screen" width="24%" />
